@@ -1,12 +1,17 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Meteor } from 'meteor/meteor';
+import { Session } from 'meteor/session'
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Tasks } from '../api/tasks.js';
+import { Tests } from '../api/tests.js';
 
-import Task from './Task.js';
-import AccountsUIWrapper from './AccountsUIWrapper.js';
+import Test from './Test.js';
+
+const USER_SES_KEY = 'user'
+
+const userId = 'user' + Math.round(Math.random() * 1000)
+Session.setDefaultPersistent(USER_SES_KEY, { id: userId, name: '', age: '' })
 
 // App component - represents the whole app
 class App extends Component {
@@ -24,7 +29,7 @@ class App extends Component {
     // Find the text field via the React ref
     const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
 
-    Meteor.call('tasks.insert', text);
+    Meteor.call('tests.insert', text);
 
     // Clear form
     ReactDOM.findDOMNode(this.refs.textInput).value = '';
@@ -37,18 +42,15 @@ class App extends Component {
   }
 
   renderTasks() {
-    let filteredTasks = this.props.tasks;
-    if (this.state.hideCompleted) {
-      filteredTasks = filteredTasks.filter(task => !task.checked);
-    }
-    return filteredTasks.map((task) => {
+    let items = this.props.tests;
+    return items.map((item) => {
       const currentUserId = this.props.currentUser && this.props.currentUser._id;
-      const showPrivateButton = task.owner === currentUserId;
+      const showPrivateButton = item.owner === currentUserId;
 
       return (
-        <Task
-          key={task._id}
-          task={task}
+        <Test
+          key={item._id}
+          item={item}
           showPrivateButton={showPrivateButton}
         />
       );
@@ -59,7 +61,8 @@ class App extends Component {
     return (
       <div className="container">
         <header>
-          <h1>Todo List ({this.props.incompleteCount})</h1>
+          <h1>Немного тестов</h1>
+          <small>{this.props.user.id}</small>
 
           <label className="hide-completed">
             <input
@@ -68,17 +71,15 @@ class App extends Component {
               checked={this.state.hideCompleted}
               onClick={this.toggleHideCompleted.bind(this)}
             />
-            Hide Completed Tasks
+            Hide Completed Tests
           </label>
-
-          <AccountsUIWrapper />
 
           { this.props.currentUser ?
             <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
               <input
                 type="text"
                 ref="textInput"
-                placeholder="Type to add new tasks"
+                placeholder="Type to add new tests"
               />
             </form> : ''
           }
@@ -93,11 +94,11 @@ class App extends Component {
 }
 
 export default withTracker(() => {
-  Meteor.subscribe('tasks');
+  Meteor.subscribe('tests');
 
   return {
-    tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch(),
-    incompleteCount: Tasks.find({ checked: { $ne: true } }).count(),
-    currentUser: Meteor.user(),
+    tests: Tests.find({}, { sort: { createdAt: -1 } }).fetch(),
+    incompleteCount: Tests.find({ checked: { $ne: true } }).count(),
+    user: Session.get(USER_SES_KEY)
   };
 })(App);

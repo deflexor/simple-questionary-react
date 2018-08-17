@@ -4,17 +4,17 @@ import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { assert } from 'chai';
 
-import { Tasks } from './tasks.js';
+import { Tests } from './tests.js';
 
 if (Meteor.isServer) {
-  describe('Tasks', () => {
+  describe('Tests', () => {
     describe('methods', () => {
       const userId = Random.id();
       let taskId;
 
       beforeEach(() => {
-        Tasks.remove({});
-        taskId = Tasks.insert({
+        Tests.remove({});
+        taskId = Tests.insert({
           text: 'test task',
           createdAt: new Date(),
           owner: userId,
@@ -25,7 +25,7 @@ if (Meteor.isServer) {
       it('can delete owned task', () => {
         // Find the internal implementation of the task method so we can
         // test it in isolation
-        const deleteTask = Meteor.server.method_handlers['tasks.remove'];
+        const deleteTask = Meteor.server.method_handlers['tests.remove'];
 
         // Set up a fake method invocation that looks like what the method expects
         const invocation = { userId };
@@ -34,7 +34,7 @@ if (Meteor.isServer) {
         deleteTask.apply(invocation, [taskId]);
 
         // Verify that the method does what we expected
-        assert.equal(Tasks.find().count(), 0);
+        assert.equal(Tests.find().count(), 0);
       });
     });
   });
