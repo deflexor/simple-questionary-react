@@ -3,15 +3,11 @@ import ReactDOM from 'react-dom';
 import { Meteor } from 'meteor/meteor';
 import { Session } from 'meteor/session'
 import { withTracker } from 'meteor/react-meteor-data';
+import { USER_SES_KEY } from '../startup/config';
 
 import { Tests } from '../api/tests.js';
 
 import Test from './Test.js';
-
-const USER_SES_KEY = 'user'
-
-const userId = 'user' + Math.round(Math.random() * 1000)
-Session.setDefaultPersistent(USER_SES_KEY, { id: userId, name: '', age: '' })
 
 // App component - represents the whole app
 class App extends Component {
