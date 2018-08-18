@@ -22,9 +22,13 @@ const EditTest = (props) => {
   );
 }
 
-const ShowTest = (props) => {
+const ShowTest = ({match, items}) => {
+  const { id } = match.params
+  const [item] = items.filter(it => it._id === id)
   return (
-    <div className="tile">show</div>
+    <div className="tile is-child notification is-vertical is-10">
+      <h4>{item.name}</h4>
+    </div>
   );
 }
 
@@ -57,7 +61,7 @@ class Adm extends Component {
     let itemsE = items.map((item) => {
       return (
         <li key={item._id}>
-          <a>{item.name}</a>
+          <Link to={`/admin123/${item._id}`}>{item.name}</Link>
         </li>
       );
     });
@@ -81,14 +85,11 @@ class Adm extends Component {
         </div>
         <div className="column">
           <Switch>
-            <Route exact path="/" component={Empty} />
+            <Route exact path={`${this.props.match.url}`} component={Empty} />
             <Route path={`${this.props.match.url}/edit`} component={EditTest} />
             <Route path={`${this.props.match.url}/edit/:id`} component={EditTest} />
-            <Route path={`${this.props.match.url}/:id`} component={ShowTest} />
+            <Route path={`${this.props.match.url}/:id`} render={(props) => <ShowTest {...props} items={items} />}  />
           </Switch>
-          <div className="tile">
-            
-          </div>
         </div>
       </div>
     )
