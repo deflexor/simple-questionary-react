@@ -28,48 +28,54 @@ class EditTest extends Component {
       err: { q: [] }
     };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleAddItem = this.handleAddItem.bind(this);
   }
 
-  handleAddItem(event) {
-    let test = this.state.test
+  handleAddItem = (e) => {
+    let { test, err } = this.state
     test.q.push({ title: '', type: REPLY_TYPES_4 })
-    this.setState({ ...this.state, test })
+    err.q.push(false)
+    this.setState({ test, err })
   }
 
-  handleDeleteItem(event, i) {
-    let test = this.state.test
-    test.q.splice(i, 1)
-    this.setState({ ...this.state, test })
+  handleDeleteItem = (idx) => (e) => {
+    let { test, err } = this.state
+    test.q = test.q.filter((e,i) => i !== idx)
+    err.q = err.q.filter((e,i) => i !== idx)
+    this.setState({ test, err })
   }
 
-  handleSubmit(event) {
+  handleChange = (e) => {
+    let { test } = this.state
+    let { target } = e
+    test[target.name] = target.value;
+    this.setState({ test });
+  }
+
+  handleChangeItem = (idx) => (e) => {
+    let { test } = this.state
+    let { target } = e
+    test.q[idx][target.name] = target.value;
+    this.setState({ test });
+  }
+  
+
+  handleSubmit = (event) => {
     event.preventDefault();
 
     let err = {}
     let test = this.state.test
-    // Find the text field via the React ref  
-    const titleE = ReactDOM.findDOMNode(this.refs.title)
-    const qE = test.q.map((e,i) => ReactDOM.findDOMNode(this.refs[`q${i}`]))
-    test.q = test.q.map((e,i) => { return { title: qE[i].value.trim(), type: REPLY_TYPES_4 } })
-    err.q = test.q.map((e,i) => { return !!test.q[i].title })
-    test.title = titleE.value.trim()
-    err.title = !!test.title
+    err.q = test.q.map((e,i) => { return !test.q[i].title })
+    err.title = !test.title
 
-    this.setState({ err, test })
-
-    const noErrors = !err.title && err.q.all(v => !v)
+    this.setState({ err });
+    const noErrors = !err.title && err.q.every(v => !v)
 
     if(noErrors) {
       console.log('inserting!', test)
       // Tests.insert(test)
     }
-    
-    // Clear form
-    titleE.value = ''
   }
-  
+
   render() {
     const { test, err } = this.state
     return (
@@ -77,31 +83,31 @@ class EditTest extends Component {
         <div className="field">
           <label className="label">Название теста</label>
           <div className="control">
-            <input className={classnames({ input: true, 'is-danger': err.title })} type="text" ref="title" placeholder="" />
+            <input className={classnames({ input: true, 'is-danger': err.title })} type="text" value={test.title} name="title" onChange={this.handleChange} placeholder="" />
           </div>
         </div>
 
-        <button className="button is-primary is-rounded" onClick={this.handleAddItem}>Добавить вопрос</button>
+        <button className="button is-primary is-rounded" type="button" onClick={this.handleAddItem}>Добавить вопрос</button>
 
         {test.q.map((item, i) => {
           return (
-            <div className="tile notification">
-              <div className="field">
+            <div className="tile notification" key={i}>
+              <div className="field" style={{width: '100%'}}>
                 <label className="label">Название</label>
-                <div className="control">
-                  <input className={classnames({ input: true, 'is-danger': err.q[i] })} type="text" ref={`q${i}`} placeholder="" />
+                <div className="control is-expanded">
+                  <input className={classnames({ input: true, 'is-danger': err.q[i] })} name="title" value={item.title} type="text" onChange={this.handleChangeItem(i)} placeholder="" autoComplete="off" />
                 </div>
               </div>
               <div className="field">
                 <label className="label">Тип ответов</label>
-                <div className="control">
+                <div className="control" style={{whiteSpace: 'nowrap'}}>
                   <div className="select">
                     <select>
-                      <option>Согласен? Нет, Частинчо, Да, Полностью</option>
+                      <option>Согласен? Нет, Частично, Да, Полностью</option>
                     </select>
                   </div>
-                  <a href="javascript:void(0)" onClick={this.handleDeleteItem.bind(this, i)} class="icon has-text-danger my-pad-top3 my-pad-left">
-                    <i class="fas fa-ban"></i>
+                  <a href="javascript:void(0)" onClick={this.handleDeleteItem(i)} className="icon has-text-danger my-pad-top3 my-pad-left">
+                    <i className="fas fa-ban"></i>
                   </a>
                 </div>
               </div>
