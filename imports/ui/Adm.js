@@ -71,8 +71,8 @@ class EditTest extends Component {
     const noErrors = !err.title && err.q.every(v => !v)
 
     if(noErrors) {
-      console.log('inserting!', test)
-      // Tests.insert(test)
+      let r = Tests.insert(test)
+      this.props.history.push('/admin123', { msg: `Добавлен новый тест! ${r}` })
     }
   }
 
@@ -83,7 +83,7 @@ class EditTest extends Component {
         <div className="field">
           <label className="label">Название теста</label>
           <div className="control">
-            <input className={classnames({ input: true, 'is-danger': err.title })} type="text" value={test.title} name="title" onChange={this.handleChange} placeholder="" />
+            <input className={classnames({ input: true, 'is-danger': err.title })} type="text" value={test.title} name="title" onChange={this.handleChange} autoComplete="off" />
           </div>
         </div>
 
@@ -162,8 +162,8 @@ class Adm extends Component {
   }
 
   render() {
-    // let items = this.props.tests;
-    let items = [{name: 'приветэ', _id: '1'},{name: 'пока', _id: '2'}];
+    let { tests, location } = this.props
+    const items = tests
     let itemsE = items.map((item) => {
       return (
         <li key={item._id}>
@@ -190,6 +190,13 @@ class Adm extends Component {
           </Link>
         </div>
         <div className="column">
+          {location.state && location.state.msg && <article className="message is-success">
+            <div className="message-header">
+              <p>Ок!</p>
+              <button className="delete" aria-label="delete"></button>
+            </div>
+            <div className="message-body">{location.state.msg}</div>
+          </article>}
           <Switch>
             <Route exact path={`${this.props.match.url}`} component={Empty} />
             <Route path={`${this.props.match.url}/edit`} render={(props) => <EditTest {...props} />} />
