@@ -4,16 +4,35 @@ import classnames from 'classnames';
 
 import { Tests } from '../api/tests.js';
 
+const DEFAULT_TEST = { q: [], title: '' }
 
 export default class EditTest extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
-      test: { q: [], title: '' },
+      test: DEFAULT_TEST,
       err: { q: [] }
     };
 
+  }
+
+  setStateFromProps() {
+    let { items, match: { params: { id } } } = this.props
+    let { test: { _id } } = this.state
+    let test = null
+    if(id) {
+      [test] = items.filter(it => it._id === id)
+    }
+    test = test || DEFAULT_TEST
+    if(_id !== test._id) this.setState({ test })
+  }
+
+  componentDidMount() {
+    this.setStateFromProps()
+  }
+
+  componentDidUpdate() {
+    this.setStateFromProps()
   }
 
   handleAddItem = (e) => {
