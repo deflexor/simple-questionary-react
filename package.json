@@ -11,8 +11,11 @@
     "@babel/runtime": "7.0.0-beta.55",
     "bulma": "^0.7.1",
     "classnames": "^2.2.6",
+    "deep-equal": "^1.0.1",
     "history": "^4.7.2",
     "meteor-node-stubs": "^0.4.1",
+    "mobx": "^5.1.0",
+    "mobx-react": "^5.2.5",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-router-dom": "^4.3.1"

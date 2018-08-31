@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Switch, Link } from 'react-router-dom';
+import { observer } from "mobx-react";
+import { observable } from "mobx";
 import classnames from 'classnames';
 import { Meteor } from 'meteor/meteor';
 import { Session } from 'meteor/session'
@@ -11,8 +13,6 @@ import { Tests } from '../api/tests.js';
 
 import Test from './Test.js';
 import EditTest from './EditTest.js';
-
-const REPLY_TYPES_4 = {}
 
 const Empty = (props) => {
   return (

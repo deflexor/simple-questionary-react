@@ -1,30 +1,33 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import classnames from 'classnames';
+import { observer } from "mobx-react";
+import { observable } from "mobx";
+import deepEqual from 'deep-equal';
 
 import { Tests } from '../api/tests.js';
+import { REPLY_TYPES_4 } from '../startup/config';
+
 
 const DEFAULT_TEST = { q: [], title: '' }
 
-export default class EditTest extends Component {
+export default EditTest = observer(class EditTest extends Component {
+
+  test = observable(DEFAULT_TEST)
+  err = observable({ q: [] })
+  
   constructor(props) {
     super(props);
-    this.state = {
-      test: DEFAULT_TEST,
-      err: { q: [] }
-    };
-
   }
 
   setStateFromProps() {
     let { items, match: { params: { id } } } = this.props
-    let { test: { _id } } = this.state
     let test = null
     if(id) {
       [test] = items.filter(it => it._id === id)
     }
     test = test || DEFAULT_TEST
-    if(_id !== test._id) this.setState({ test })
+    if(! deepEqual(this.test, test)) Object.assign(this.test, test)
   }
 
   componentDidMount() {
@@ -36,31 +39,24 @@ export default class EditTest extends Component {
   }
 
   handleAddItem = (e) => {
-    let { test, err } = this.state
-    test.q.push({ title: '', type: REPLY_TYPES_4 })
-    err.q.push(false)
-    this.setState({ test, err })
+    this.test.q.push({ title: '', type: REPLY_TYPES_4 })
+    this.err.q.push(false)
   }
 
   handleDeleteItem = (idx) => (e) => {
     let { test, err } = this.state
-    test.q = test.q.filter((e,i) => i !== idx)
-    err.q = err.q.filter((e,i) => i !== idx)
-    this.setState({ test, err })
+    this.test.q = test.q.filter((e,i) => i !== idx)
+    this.err.q = err.q.filter((e,i) => i !== idx)
   }
 
   handleChange = (e) => {
-    let { test } = this.state
     let { target } = e
-    test[target.name] = target.value;
-    this.setState({ test });
+    this.test[target.name] = target.value;
   }
 
   handleChangeItem = (idx) => (e) => {
-    let { test } = this.state
     let { target } = e
-    test.q[idx][target.name] = target.value;
-    this.setState({ test });
+    this.test.q[idx][target.name] = target.value;
   }
   
 
@@ -68,11 +64,10 @@ export default class EditTest extends Component {
     event.preventDefault();
 
     let err = {}
-    let test = this.state.test
     err.q = test.q.map((e,i) => { return !test.q[i].title })
     err.title = !test.title
 
-    this.setState({ err });
+    this.err = err
     const noErrors = !err.title && err.q.every(v => !v)
 
     if(noErrors) {
@@ -82,7 +77,7 @@ export default class EditTest extends Component {
   }
 
   render() {
-    const { test, err } = this.state
+    const { test, err } = this
     return (
       <form onSubmit={this.handleSubmit}>
         <div className="field">
@@ -100,7 +95,7 @@ export default class EditTest extends Component {
               <div className="field" style={{width: '100%'}}>
                 <label className="label">Название</label>
                 <div className="control is-expanded">
-                  <input className={classnames({ input: true, 'is-danger': err.q[i] })} name="title" value={item.title} type="text" onChange={this.handleChangeItem(i)} placeholder="" autoComplete="off" />
+                  <input className={classnames({ input: true, 'is-danger': err.q.length > i+1 ? err.q[i] : false })} name="title" value={item.title} type="text" onChange={this.handleChangeItem(i)} placeholder="" autoComplete="off" />
                 </div>
               </div>
               <div className="field">
@@ -131,5 +126,5 @@ export default class EditTest extends Component {
       </form>
     )
   }
-}
+})
 
