@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import classnames from 'classnames';
 import { observer } from "mobx-react";
-import { observable } from "mobx";
+import { observable, action } from "mobx";
 import deepEqual from 'deep-equal';
 
 import { Tests } from '../api/tests.js';
@@ -20,22 +20,19 @@ export default EditTest = observer(class EditTest extends Component {
     super(props);
   }
 
-  setStateFromProps() {
-    let { items, match: { params: { id } } } = this.props
-    let test = null
-    if(id) {
-      [test] = items.filter(it => it._id === id)
-    }
+  loadTest = action(() => {
+    let { test } = this.props
     test = test || DEFAULT_TEST
-    if(! deepEqual(this.test, test)) Object.assign(this.test, test)
-  }
+    Object.assign(this.test, test)
+  })
 
   componentDidMount() {
-    this.setStateFromProps()
+    console.log('cdm');
+    this.loadTest()
   }
 
   componentDidUpdate() {
-    this.setStateFromProps()
+    console.log('cdu');
   }
 
   handleAddItem = (e) => {

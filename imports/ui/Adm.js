@@ -55,6 +55,18 @@ class Adm extends Component {
     ReactDOM.findDOMNode(this.refs.textInput).value = '';
   }
 
+  renderEditPage = (rprops) => {
+    let { match: { params: { id } } } = rprops
+    let { tests } = this.props
+    if(id) {
+      let [test] = tests.filter(it => it._id === id)
+      return <EditTest {...rprops} key={id} test={test} />
+    }
+    else {
+      return <EditTest {...rprops} key="edit" />
+    }
+  }
+
   render() {
     let { tests, location } = this.props
     const items = tests
@@ -93,8 +105,8 @@ class Adm extends Component {
           </article>}
           <Switch>
             <Route exact path={`${this.props.match.url}`} component={Empty} />
-            <Route path={`${this.props.match.url}/edit/:id`} render={(props) => <EditTest {...props} items={items} />} />
-            <Route path={`${this.props.match.url}/edit`} render={(props) => <EditTest {...props} items={items} />} />
+            <Route path={`${this.props.match.url}/edit/:id`} render={this.renderEditPage} />
+            <Route path={`${this.props.match.url}/edit`} render={this.renderEditPage} />
             <Route path={`${this.props.match.url}/:id`} render={(props) => <ShowTest {...props} items={items} />}  />
           </Switch>
         </div>
