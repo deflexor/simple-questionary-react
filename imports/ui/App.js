@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import { Route, Switch, Link } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { Session } from 'meteor/session'
 import { withTracker } from 'meteor/react-meteor-data';
@@ -8,6 +9,13 @@ import { USER_SES_KEY } from '../startup/config';
 import { Tests } from '../api/tests.js';
 
 import Test from './Test.js';
+import ShowTest from './ShowTest.js';
+
+const Empty = (props) => {
+  return (
+    <div className="tile is-child notification is-vertical is-10">Выберите тест</div>
+  );
+}
 
 // App component - represents the whole app
 class App extends Component {
@@ -15,77 +23,69 @@ class App extends Component {
     super(props);
 
     this.state = {
-      hideCompleted: false,
     };
   }
 
-  handleSubmit(event) {
-    event.preventDefault();
-
-    // Find the text field via the React ref
-    const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
-
-    Meteor.call('tests.insert', text);
-
-    // Clear form
-    ReactDOM.findDOMNode(this.refs.textInput).value = '';
+  handleChange = (e) => {
+    let { user } = this.props
+    let { target } = e
+    user[target.name] = target.value;
+    Session.set(USER_SES_KEY, user)
+    // this.setState({ test });
   }
 
-  toggleHideCompleted() {
-    this.setState({
-      hideCompleted: !this.state.hideCompleted,
-    });
-  }
-
-  renderTasks() {
-    let items = this.props.tests;
-    return items.map((item) => {
-      const currentUserId = this.props.currentUser && this.props.currentUser._id;
-      const showPrivateButton = item.owner === currentUserId;
-
-      return (
-        <Test
-          key={item._id}
-          item={item}
-          showPrivateButton={showPrivateButton}
-        />
-      );
-    });
-  }
 
   render() {
+    let { tests, user, location } = this.props
+    const items = tests
+    let itemsE = items.map((item) => {
+      return (
+        <li key={item._id}>
+          <Link to={`/${item._id}`}>{item.title}</Link>
+        </li>
+      );
+    });
+
     return (
-      <div className="container">
-        <header>
-          <h1>Немного тестов</h1>
-          <small>{this.props.user.id}</small>
-
-          <label className="hide-completed">
-            <input
-              type="checkbox"
-              readOnly
-              checked={this.state.hideCompleted}
-              onClick={this.toggleHideCompleted.bind(this)}
-            />
-            Hide Completed Tests
-          </label>
-
-          { this.props.currentUser ?
-            <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
-              <input
-                type="text"
-                ref="textInput"
-                placeholder="Type to add new tests"
-              />
-            </form> : ''
-          }
-        </header>
-
-        <ul>
-          {this.renderTasks()}
-        </ul>
+      <div className="columns">
+        
+        <div className="menu column is-one-quarter">
+          <p className="menu-label">
+            Тесты
+          </p>
+          <ul className="menu-list">
+            {itemsE}
+          </ul>
+        </div>
+        <div className="column">
+          <nav className="level">
+            <div className="level-left">
+              <div className="level-item">
+                <div className="field has-addons">
+                  <p className="control">
+                    <input  className="input" name="name" value={user.name} type="text" onChange={this.handleChange} autoComplete="off" placeholder="Имя" />
+                  </p>
+                  <p className="control">
+                    <input className="input" name="age" value={user.age} type="text" onChange={this.handleChange} autoComplete="off" placeholder="Возраст" />
+                  </p>
+                </div>
+              </div>
+            </div>
+          </nav>
+          {location.state && location.state.msg && <article className="message is-success">
+            <div className="message-header">
+              <p>Ок!</p>
+              <button className="delete" aria-label="delete"></button>
+            </div>
+            <div className="message-body">{location.state.msg}</div>
+          </article>}
+          <Switch>
+            <Route exact path={`/`} component={Empty} />
+            <Route path={`/:id`} render={(props) => <ShowTest {...props} items={items} />}  />
+          </Switch>
+        </div>
       </div>
-    );
+    )
   }
 }
 
@@ -94,7 +94,6 @@ export default withTracker(() => {
 
   return {
     tests: Tests.find({}, { sort: { createdAt: -1 } }).fetch(),
-    incompleteCount: Tests.find({ checked: { $ne: true } }).count(),
     user: Session.get(USER_SES_KEY)
   };
 })(App);

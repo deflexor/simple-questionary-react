@@ -21,38 +21,13 @@ const Empty = (props) => {
 }
 
 
-
-const ShowTest = ({match, items}) => {
-  const { id } = match.params
-  const [item] = items.filter(it => it._id === id)
-  return (
-    <div className="tile is-child notification is-vertical is-10">
-      <h4>{item.title}</h4>
-    </div>
-  );
-}
-
-
 // App component - represents the whole app
 class Adm extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      hideCompleted: false,
     };
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-
-    // Find the text field via the React ref
-    const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
-
-    Meteor.call('tests.insert', text);
-
-    // Clear form
-    ReactDOM.findDOMNode(this.refs.textInput).value = '';
   }
 
   render() {
@@ -93,9 +68,8 @@ class Adm extends Component {
           </article>}
           <Switch>
             <Route exact path={`${this.props.match.url}`} component={Empty} />
-            <Route path={`${this.props.match.url}/edit/:id`} render={(props) => <EditTest {...props} items={items} />} />
-            <Route path={`${this.props.match.url}/edit`} render={(props) => <EditTest {...props} items={items} />} />
-            <Route path={`${this.props.match.url}/:id`} render={(props) => <ShowTest {...props} items={items} />}  />
+            <Route path={`${this.props.match.url}/edit/:id`} render={(props) => <EditTest {...props} key={props.match.params.id} items={items} />} />
+            <Route path={`${this.props.match.url}/edit`} render={(props) => <EditTest {...props} key="edit" items={items} />} />
           </Switch>
         </div>
       </div>
