@@ -14,8 +14,15 @@ export default class ShowTest extends Component {
   handleChange = (e) => {
     let { test } = this.state
     let { target } = e
-    test[target.name] = target.value;
-    this.setState({ test });
+    test[target.name] = target.value
+    this.setState({ test })
+  }
+
+  handleOptionChange = (e) => {
+    let { target } = e
+    let id = target.name
+    let v = target.value
+    // TODO mongo expr
   }
 
   render() {
@@ -43,12 +50,19 @@ export default class ShowTest extends Component {
             <div className="tile notification" key={i}>
               <div className="field">
                 <label className="label">{item.title}</label>
-                <div className="control" style={{whiteSpace: 'nowrap'}}>
-                  <div className="select">
-                    <select>
-                      <option>Согласен? Нет, Частично, Да, Полностью</option>
-                    </select>
-                  </div>
+                <div className="control">
+                  <label className="radio">
+                    <input type="radio" name={i} value={0} onChange={this.handleOptionChange} />
+                      0
+                  </label>
+                  <label className="radio">
+                    <input type="radio" name={i} value={1} onChange={this.handleOptionChange} />
+                      1
+                  </label>
+                  <label className="radio" disabled>
+                    <input type="radio" name={i} value={2} onChange={this.handleOptionChange} />
+                      2
+                  </label>
                 </div>
               </div>
             </div>
